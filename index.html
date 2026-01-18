@@ -2,17 +2,16 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>NexusCode IDE | GitHub Workspaces Style</title>
+    <title>NexusCode IDE | GitHub Workspaces</title>
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css">
     
     <style>
-        /* GitHub Dark Dimmed / VS Code Original Colors */
         :root {
-            --activity-bg: #24292e; /* GitHub Header/Activity Style */
+            --activity-bg: #24292e;
             --sidebar-bg: #1b1f23;
             --editor-bg: #0d1117;
             --panel-bg: #0d1117;
-            --status-bg: #24292e;
+            --status-bg: #21262d;
             --accent-blue: #58a6ff;
             --border: #30363d;
             --tab-active: #0d1117;
@@ -23,7 +22,6 @@
 
         body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--editor-bg); color: var(--text-main); }
 
-        /* Das exakte Grid aus deinem Bild */
         .app-container {
             display: grid;
             grid-template-columns: 48px 260px 1fr;
@@ -31,65 +29,63 @@
             height: 100vh;
         }
 
-        /* A: Activity Bar (Schmal, Icons zentriert) */
+        /* Activity Bar */
         .activity-bar {
             grid-row: 1 / 3;
             background: var(--activity-bg);
             border-right: 1px solid var(--border);
             display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 18px;
         }
-        .act-icon { width: 24px; height: 24px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: color 0.2s; }
-        .act-icon:hover { color: white; }
+        .act-icon { width: 24px; height: 24px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .act-icon.active { color: white; border-left: 2px solid var(--accent-blue); width: 46px; }
 
-        /* B: Primary Side Bar (Explorer) */
+        /* Sidebar */
         .sidebar {
             grid-row: 1 / 3;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
             display: flex; flex-direction: column;
         }
-        .sidebar-header { padding: 10px 16px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-header { padding: 10px 16px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
         .file-list { list-style: none; padding: 0; margin: 0; }
-        .file { padding: 4px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main); }
+        .file { padding: 6px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
         .file:hover { background: #21262d; }
         .file.active { background: #2d333b; color: white; }
 
-        /* C: Editor Groups (Tabs + Code) */
-        .editor-area {
-            display: flex; flex-direction: column;
-            background: var(--editor-bg);
-        }
+        /* Editor */
+        .editor-area { display: flex; flex-direction: column; background: var(--editor-bg); }
         .tab-container { display: flex; background: var(--tab-inactive); height: 35px; border-bottom: 1px solid var(--border); }
-        .tab { padding: 8px 16px; font-size: 12px; border-right: 1px solid var(--border); cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 8px; background: var(--tab-inactive); }
-        .tab.active { background: var(--tab-active); color: white; border-top: 1px solid var(--accent-blue); height: 34px; }
+        .tab { padding: 8px 16px; font-size: 12px; border-right: 1px solid var(--border); cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .tab.active { background: var(--tab-active); color: white; border-top: 1px solid var(--accent-blue); }
 
         #monaco-editor { flex-grow: 1; }
 
-        /* D: Panel (Terminal / Preview Split) */
+        /* Panel (Terminal + Preview) */
         .panel-area {
             grid-column: 3 / 4;
             background: var(--panel-bg);
             border-top: 1px solid var(--border);
-            display: grid; grid-template-columns: 1fr 1fr; /* Terminal links, Preview rechts */
+            display: grid; grid-template-columns: 1fr 1fr;
         }
         .terminal-box { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
         .panel-nav { display: flex; gap: 15px; padding: 0 15px; font-size: 11px; height: 30px; align-items: center; border-bottom: 1px solid var(--border); color: var(--text-muted); }
         .panel-nav span.active { color: var(--accent-blue); font-weight: 600; }
-        #console { flex-grow: 1; padding: 10px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; overflow-y: auto; color: #7ee787; }
+        #console { flex-grow: 1; padding: 10px; font-family: monospace; font-size: 12px; overflow-y: auto; color: #7ee787; white-space: pre-wrap; }
 
-        .preview-box { background: white; }
+        .preview-box { background: white; position: relative; }
         iframe { width: 100%; height: 100%; border: none; }
+        .preview-label { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ccc; pointer-events: none; }
 
-        /* E: Status Bar */
+        /* Status Bar */
         .status-bar {
             grid-column: 1 / 4;
-            background: #21262d;
+            background: var(--status-bg);
             border-top: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 12px; font-size: 12px; color: var(--text-muted);
         }
-        .status-left { display: flex; align-items: center; gap: 15px; color: white; background: var(--accent-blue); padding: 0 10px; height: 100%; }
+        .status-left { display: flex; align-items: center; gap: 10px; color: white; background: var(--accent-blue); padding: 0 10px; height: 100%; font-weight: 500; }
+        .save-indicator { font-style: italic; font-size: 10px; margin-left: 10px; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -107,15 +103,16 @@
     <div class="sidebar">
         <div class="sidebar-header">Explorer</div>
         <ul class="file-list">
-            <li class="file active" onclick="load('html')"><span>📄</span> index.html</li>
-            <li class="file" onclick="load('css')"><span>🎨</span> style.css</li>
-            <li class="file" onclick="load('javascript')"><span>⚡</span> script.js</li>
+            <li class="file active" id="f-html" onclick="load('html')"><span>📄</span> index.html</li>
+            <li class="file" id="f-css" onclick="load('css')"><span>🎨</span> style.css</li>
+            <li class="file" id="f-javascript" onclick="load('javascript')"><span>⚡</span> script.js</li>
         </ul>
     </div>
 
     <div class="editor-area">
         <div class="tab-container">
             <div class="tab active" id="active-tab-title">index.html</div>
+            <div class="save-indicator" id="save-status">Vorgang gespeichert...</div>
         </div>
         <div id="monaco-editor"></div>
     </div>
@@ -128,16 +125,17 @@
                 <span class="active">TERMINAL</span>
                 <span>DEBUG CONSOLE</span>
             </div>
-            <div id="console">> NexusCode Engine v2.0 initialized...<br>> Ready for development.</div>
+            <div id="console">> NexusCode Workspace v3.0 [Stable]<br>> Autosave aktiv.</div>
         </div>
         <div class="preview-box">
+            <div class="preview-label">LIVE PREVIEW</div>
             <iframe id="preview-frame"></iframe>
         </div>
     </div>
 
     <footer class="status-bar">
         <div class="status-left">main*</div>
-        <div style="flex-grow: 1; padding-left: 15px;">0 △ 0 ⊗</div>
+        <div style="flex-grow: 1; padding-left: 15px;">0 △ 0 ⊗  -- Ln 1, Col 1</div>
         <div>amancreatecode Copyright 2026</div>
     </footer>
 </div>
@@ -146,55 +144,75 @@
 <script>
     let editor;
     let currentMode = 'html';
-    const project = {
-        html: `\n<div class="hero">\n  <h1>GitHub Workspace Clone</h1>\n  <button id="btn">Build Something Great</button>\n</div>`,
-        css: `body { background: #0d1117; color: white; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }\n.hero { text-align: center; border: 1px solid #30363d; padding: 40px; border-radius: 6px; }\nbutton { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }`,
-        javascript: `document.getElementById('btn').onclick = () => {\n  console.log('Action triggered!');\n  alert('Hello from NexusCode!');\n};`
+    
+    // Standard-Projekt oder aus LocalStorage laden
+    const defaultProject = {
+        html: `<div class="card">\n  <h1>NexusCode IDE</h1>\n  <p>Dein Code wird automatisch gespeichert.</p>\n  <button id="btn">Klick mich</button>\n</div>`,
+        css: `body { background: #0d1117; color: white; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }\n.card { text-align: center; border: 1px solid #30363d; padding: 40px; border-radius: 6px; background: #161b22; }\nbutton { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; }`,
+        javascript: `document.getElementById('btn').onclick = () => {\n  console.log('Autosave funktioniert!');\n  alert('NexusCode IDE bereit!');\n};`
     };
+
+    let project = JSON.parse(localStorage.getItem('nexus_project')) || defaultProject;
 
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
     require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-            value: project.html,
+            value: project[currentMode],
             language: 'html',
             theme: 'vs-dark',
             automaticLayout: true,
             fontFamily: "'Fira Code', monospace",
             fontSize: 13,
-            lineHeight: 20,
-            padding: { top: 10 }
+            minimap: { enabled: true }
         });
 
-        // Auto-Run Simulation
+        // Event: Speichern und Preview bei jeder Änderung
         editor.onDidChangeModelContent(() => {
-            updatePreview();
+            saveAndRefresh();
         });
+
         updatePreview();
     });
 
-    function load(file) {
+    function saveAndRefresh() {
         project[currentMode] = editor.getValue();
+        localStorage.setItem('nexus_project', JSON.stringify(project));
+        
+        const indicator = document.getElementById('save-status');
+        indicator.innerText = "Speichere...";
+        setTimeout(() => indicator.innerText = "Alle Änderungen gespeichert", 500);
+        
+        updatePreview();
+    }
+
+    function load(file) {
+        // Vorherigen Stand sichern
+        project[currentMode] = editor.getValue();
+        
         currentMode = file;
         document.getElementById('active-tab-title').innerText = file === 'javascript' ? 'script.js' : (file === 'css' ? 'style.css' : 'index.html');
+        
+        // UI Tabs/Sidebar anpassen
+        document.querySelectorAll('.file').forEach(f => f.classList.remove('active'));
+        document.getElementById('f-' + file).classList.add('active');
+
+        // Monaco Sprache & Inhalt ändern
         monaco.editor.setModelLanguage(editor.getModel(), file === 'javascript' ? 'javascript' : file);
         editor.setValue(project[file]);
-        
-        document.querySelectorAll('.file').forEach(f => f.classList.remove('active'));
-        event.currentTarget.classList.add('active');
     }
 
     function updatePreview() {
         const frame = document.getElementById('preview-frame');
         const code = `<html><head><style>${project.css}</style></head><body>${project.html}<script>
             console.log = (m) => window.parent.postMessage(m, "*");
-            ${project.javascript}
+            try { ${project.javascript} } catch(e) { console.log("Error: " + e.message); }
         <\/script></body></html>`;
         frame.srcdoc = code;
     }
 
     window.onmessage = (e) => {
         const c = document.getElementById('console');
-        c.innerHTML += `<br><span style="color:white">➜</span> ${e.data}`;
+        c.innerHTML += `<br><span style="color:#58a6ff">➜</span> ${e.data}`;
         c.scrollTop = c.scrollHeight;
     };
 </script>
