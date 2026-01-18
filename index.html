@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusCode IDE | Professional Web Editor</title>
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #181818;
+            --sidebar-bg: #1e1e1e;
+            --tab-active: #1e1e1e;
+            --tab-inactive: #2d2d2d;
+            --accent-blue: #007acc;
+            --accent-green: #28a745;
+            --border: #333333;
+            --text-main: #d4d4d4;
+            --terminal-bg: #0c0c0c;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header / Activity Bar */
+        .top-nav {
+            height: 48px;
+            background: var(--sidebar-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .logo { font-size: 18px; font-weight: 600; letter-spacing: 1px; }
+        .logo span { color: var(--accent-blue); }
+
+        .controls { display: flex; gap: 10px; }
+
+        .btn {
+            border: none; border-radius: 4px; color: white;
+            padding: 6px 14px; cursor: pointer; font-weight: 500;
+            transition: opacity 0.2s; font-size: 13px;
+        }
+        .btn-run { background: var(--accent-green); }
+        .btn-download { background: var(--accent-blue); }
+        .btn:hover { opacity: 0.85; }
+
+        /* Main Workspace */
+        .workspace {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .editor-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+
+        .preview-pane {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            background: var(--tab-inactive);
+            height: 35px;
+        }
+
+        .tab {
+            padding: 8px 25px;
+            cursor: pointer;
+            font-size: 12px;
+            border-right: 1px solid var(--border);
+            background: var(--tab-inactive);
+            color: #999;
+        }
+
+        .tab.active {
+            background: var(--tab-active);
+            color: white;
+            border-bottom: 2px solid var(--accent-blue);
+        }
+
+        #editor-widget { flex-grow: 1; }
+
+        #console-output {
+            height: 140px;
+            background: var(--terminal-bg);
+            border-top: 1px solid var(--border);
+            font-family: 'Consolas', monospace;
+            padding: 10px;
+            overflow-y: auto;
+            color: #00ff00;
+            font-size: 12px;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; background: white; }
+
+        /* Footer */
+        footer {
+            height: 25px;
+            background: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: white;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <header class="top-nav">
+        <div class="logo">Nexus<span>Code</span></div>
+        <div class="controls">
+            <button class="btn btn-download" onclick="exportProject()">Download Project</button>
+            <button class="btn btn-run" onclick="deployCode()">Run App ▶</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <div class="editor-pane">
+            <div class="tab-bar">
+                <div id="tab-html" class="tab active" onclick="changeTab('html')">index.html</div>
+                <div id="tab-css" class="tab" onclick="changeTab('css')">style.css</div>
+                <div id="tab-js" class="tab" onclick="changeTab('javascript')">script.js</div>
+            </div>
+            <div id="editor-widget"></div>
+            <div id="console-output">> NexusCode Console initialized...</div>
+        </div>
+
+        <div class="preview-pane">
+            <iframe id="live-render"></iframe>
+        </div>
+    </div>
+
+    <footer>
+        amancreatecode Copyright 2026
+    </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+<script>
+    let editor;
+    let activeMode = 'html';
+    
+    const sourceFiles = {
+        html: `\n<div class="container">\n  <h1>NexusCode IDE</h1>\n  <p>Status: <span id="status">Online</span></p>\n  <button id="actionBtn">Click Me</button>\n</div>`,
+        css: `/* Layout Styling */\nbody {\n  font-family: sans-serif;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n  margin: 0;\n  background: #f0f2f5;\n}\n.container {\n  text-align: center;\n  background: white;\n  padding: 40px;\n  border-radius: 15px;\n  box-shadow: 0 10px 25px rgba(0,0,0,0.1);\n}\nbutton {\n  background: #007acc;\n  color: white;\n  border: none;\n  padding: 10px 20px;\n  border-radius: 5px;\n  cursor: pointer;\n}`,
+        javascript: `// Application Logic\ndocument.getElementById('actionBtn').onclick = () => {\n  console.log('Button clicked at ' + new Date().toLocaleTimeString());\n  document.getElementById('status').innerText = 'Active ⚡';\n  document.body.style.backgroundColor = '#e3f2fd';\n};`
+    };
+
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-widget'), {
+            value: sourceFiles.html,
+            language: 'html',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 14,
+            fontFamily: "'Fira Code', 'Consolas', monospace",
+            minimap: { enabled: true }
+        });
+    });
+
+    function changeTab(mode) {
+        // Save current work
+        sourceFiles[activeMode] = editor.getValue();
+        
+        // UI Switch
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + (mode === 'javascript' ? 'js' : mode)).classList.add('active');
+        
+        // Editor Update
+        activeMode = mode;
+        monaco.editor.setModelLanguage(editor.getModel(), mode);
+        editor.setValue(sourceFiles[mode]);
+    }
+
+    function deployCode() {
+        sourceFiles[activeMode] = editor.getValue();
+        const logPanel = document.getElementById('console-output');
+        logPanel.innerHTML += `<br>> Compiling Project...`;
+
+        const renderTarget = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <style>${sourceFiles.css}</style>
+                </head>
+                <body>
+                    ${sourceFiles.html}
+                    <script>
+                        // Intercept Console
+                        const originalLog = console.log;
+                        console.log = function(msg) {
+                            window.parent.postMessage({log: msg}, '*');
+                            originalLog.apply(console, arguments);
+                        };
+                        try {
+                            ${sourceFiles.javascript}
+                        } catch(err) {
+                            console.log("Runtime Error: " + err.message);
+                        }
+                    <\/script>
+                </body>
+            </html>`;
+        
+        const iframe = document.getElementById('live-render');
+        iframe.srcdoc = renderTarget;
+        logPanel.innerHTML += `<br><span style="color:#28a745">> Build successful.</span>`;
+        logPanel.scrollTop = logPanel.scrollHeight;
+    }
+
+    // Bridge for Iframe Logs
+    window.addEventListener('message', (e) => {
+        if (e.data.log) {
+            const logPanel = document.getElementById('console-output');
+            logPanel.innerHTML += `<br><span style="color: #fff">[NexusLog]:</span> ${e.data.log}`;
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+    });
+
+    function exportProject() {
+        const fullContent = `\n<!DOCTYPE html><html><head><style>${sourceFiles.css}</style></head><body>${sourceFiles.html}<script>${sourceFiles.javascript}<\/script></body></html>`;
+        const blob = new Blob([fullContent], {type: 'text/html'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'nexus_project.html';
+        link.click();
+    }
+</script>
+
+</body>
+</html>
