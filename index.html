@@ -2,183 +2,200 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>NexusCode IDE Pro</title>
+    <title>NexusCode IDE | GitHub Workspaces Style</title>
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css">
+    
     <style>
+        /* GitHub Dark Dimmed / VS Code Original Colors */
         :root {
-            --activity-bg: #333333;
-            --sidebar-bg: #252526;
-            --editor-bg: #1e1e1e;
-            --panel-bg: #1e1e1e;
-            --status-bg: #007acc;
-            --border: #3c3c3c;
-            --text-muted: #858585;
+            --activity-bg: #24292e; /* GitHub Header/Activity Style */
+            --sidebar-bg: #1b1f23;
+            --editor-bg: #0d1117;
+            --panel-bg: #0d1117;
+            --status-bg: #24292e;
+            --accent-blue: #58a6ff;
+            --border: #30363d;
+            --tab-active: #0d1117;
+            --tab-inactive: #161b22;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
         }
 
-        body, html { margin: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; color: white; }
-        
-        /* Main Layout Grid */
-        .app-grid {
+        body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--editor-bg); color: var(--text-main); }
+
+        /* Das exakte Grid aus deinem Bild */
+        .app-container {
             display: grid;
-            grid-template-columns: 50px 250px 1fr 1fr; /* Activity, Sidebar, Editor, Preview */
-            grid-template-rows: 1fr 200px 22px; /* Content, Panel, Status */
+            grid-template-columns: 48px 260px 1fr;
+            grid-template-rows: 1fr 240px 22px;
             height: 100vh;
         }
 
-        /* A: Activity Bar */
+        /* A: Activity Bar (Schmal, Icons zentriert) */
         .activity-bar {
             grid-row: 1 / 3;
             background: var(--activity-bg);
-            display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 20px;
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 18px;
         }
-        .act-icon { width: 28px; height: 28px; opacity: 0.5; cursor: pointer; border-left: 2px solid transparent; }
-        .act-icon.active { opacity: 1; border-left-color: white; }
+        .act-icon { width: 24px; height: 24px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: color 0.2s; }
+        .act-icon:hover { color: white; }
+        .act-icon.active { color: white; border-left: 2px solid var(--accent-blue); width: 46px; }
 
-        /* B: Primary Side Bar */
+        /* B: Primary Side Bar (Explorer) */
         .sidebar {
             grid-row: 1 / 3;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
             display: flex; flex-direction: column;
         }
-        .sidebar-title { padding: 10px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: bold; }
-        .file-tree { padding: 0; margin: 0; list-style: none; font-size: 13px; }
-        .file-item { padding: 4px 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .file-item:hover { background: #2a2d2e; }
-        .file-item.active { background: #37373d; }
+        .sidebar-header { padding: 10px 16px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .file-list { list-style: none; padding: 0; margin: 0; }
+        .file { padding: 4px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main); }
+        .file:hover { background: #21262d; }
+        .file.active { background: #2d333b; color: white; }
 
-        /* C: Editor Groups */
-        .editor-group {
-            background: var(--editor-bg);
+        /* C: Editor Groups (Tabs + Code) */
+        .editor-area {
             display: flex; flex-direction: column;
-            border-right: 1px solid var(--border);
+            background: var(--editor-bg);
         }
-        .tabs { display: flex; background: #2d2d2d; height: 35px; overflow-x: auto; }
-        .tab { padding: 8px 15px; font-size: 12px; background: #2d2d2d; border-right: 1px solid var(--border); cursor: pointer; min-width: 80px; text-align: center; }
-        .tab.active { background: var(--editor-bg); color: white; }
+        .tab-container { display: flex; background: var(--tab-inactive); height: 35px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 8px 16px; font-size: 12px; border-right: 1px solid var(--border); cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 8px; background: var(--tab-inactive); }
+        .tab.active { background: var(--tab-active); color: white; border-top: 1px solid var(--accent-blue); height: 34px; }
 
-        #editor-container { flex-grow: 1; }
+        #monaco-editor { flex-grow: 1; }
 
-        /* Preview Area (Eigene Ergänzung für App-Building) */
-        .preview-group { grid-row: 1 / 3; background: white; display: flex; flex-direction: column; }
-        .preview-toolbar { height: 35px; background: #f3f3f3; display: flex; align-items: center; padding: 0 10px; justify-content: space-between; border-bottom: 1px solid #ccc; }
-        iframe { width: 100%; flex-grow: 1; border: none; }
-
-        /* D: Panel (Terminal) */
-        .panel {
-            grid-column: 3 / 4; /* Nur unter dem Editor */
+        /* D: Panel (Terminal / Preview Split) */
+        .panel-area {
+            grid-column: 3 / 4;
             background: var(--panel-bg);
             border-top: 1px solid var(--border);
-            display: flex; flex-direction: column;
+            display: grid; grid-template-columns: 1fr 1fr; /* Terminal links, Preview rechts */
         }
-        .panel-tabs { display: flex; padding: 0 20px; gap: 20px; font-size: 11px; border-bottom: 1px solid var(--border); height: 30px; align-items: center; color: var(--text-muted); }
-        .panel-tabs span.active { color: white; border-bottom: 1px solid white; }
-        #terminal-out { padding: 10px; font-family: monospace; font-size: 12px; color: #33ff33; overflow-y: auto; flex-grow: 1; }
+        .terminal-box { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .panel-nav { display: flex; gap: 15px; padding: 0 15px; font-size: 11px; height: 30px; align-items: center; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+        .panel-nav span.active { color: var(--accent-blue); font-weight: 600; }
+        #console { flex-grow: 1; padding: 10px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; overflow-y: auto; color: #7ee787; }
+
+        .preview-box { background: white; }
+        iframe { width: 100%; height: 100%; border: none; }
 
         /* E: Status Bar */
         .status-bar {
-            grid-column: 1 / 5;
-            background: var(--status-bg);
+            grid-column: 1 / 4;
+            background: #21262d;
+            border-top: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 10px; font-size: 12px; color: white;
+            padding: 0 12px; font-size: 12px; color: var(--text-muted);
         }
-
-        .run-btn { background: #28a745; color: white; border: none; padding: 2px 10px; border-radius: 2px; cursor: pointer; font-size: 11px; }
+        .status-left { display: flex; align-items: center; gap: 15px; color: white; background: var(--accent-blue); padding: 0 10px; height: 100%; }
     </style>
 </head>
 <body>
 
-<div class="app-grid">
+<div class="app-container">
     <div class="activity-bar">
-        <div class="act-icon active">📄</div>
+        <div class="act-icon active">📁</div>
         <div class="act-icon">🔍</div>
+        <div class="act-icon">🌿</div>
+        <div class="act-icon">🛠️</div>
+        <div style="flex-grow: 1;"></div>
         <div class="act-icon">⚙️</div>
     </div>
 
     <div class="sidebar">
-        <div class="sidebar-title">Explorer: Projekt-X</div>
-        <ul class="file-tree">
-            <li class="file-item active" onclick="switchFile('html')">index.html</li>
-            <li class="file-item" onclick="switchFile('css')">style.css</li>
-            <li class="file-item" onclick="switchFile('javascript')">script.js</li>
+        <div class="sidebar-header">Explorer</div>
+        <ul class="file-list">
+            <li class="file active" onclick="load('html')"><span>📄</span> index.html</li>
+            <li class="file" onclick="load('css')"><span>🎨</span> style.css</li>
+            <li class="file" onclick="load('javascript')"><span>⚡</span> script.js</li>
         </ul>
     </div>
 
-    <div class="editor-group">
-        <div class="tabs" id="tab-header">
-            <div class="tab active" id="tab-name">index.html</div>
+    <div class="editor-area">
+        <div class="tab-container">
+            <div class="tab active" id="active-tab-title">index.html</div>
         </div>
-        <div id="editor-container"></div>
+        <div id="monaco-editor"></div>
     </div>
 
-    <div class="preview-group">
-        <div class="preview-toolbar">
-            <span style="color: #666; font-size: 11px;">Browser Preview</span>
-            <button class="run-btn" onclick="runApp()">Build & Run</button>
+    <div class="panel-area">
+        <div class="terminal-box">
+            <div class="panel-nav">
+                <span>PROBLEMS</span>
+                <span>OUTPUT</span>
+                <span class="active">TERMINAL</span>
+                <span>DEBUG CONSOLE</span>
+            </div>
+            <div id="console">> NexusCode Engine v2.0 initialized...<br>> Ready for development.</div>
         </div>
-        <iframe id="app-preview"></iframe>
+        <div class="preview-box">
+            <iframe id="preview-frame"></iframe>
+        </div>
     </div>
 
-    <div class="panel">
-        <div class="panel-tabs">
-            <span>PROBLEMS</span>
-            <span>OUTPUT</span>
-            <span class="active">TERMINAL</span>
-            <span>DEBUG CONSOLE</span>
-        </div>
-        <div id="terminal-out">> NexusCode Terminal ready...</div>
-    </div>
-
-    <div class="status-bar">
-        <div>main* | JavaScript</div>
+    <footer class="status-bar">
+        <div class="status-left">main*</div>
+        <div style="flex-grow: 1; padding-left: 15px;">0 △ 0 ⊗</div>
         <div>amancreatecode Copyright 2026</div>
-    </div>
+    </footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
 <script>
     let editor;
-    let currentFile = 'html';
-    const codeStorage = {
-        html: '<h1>Willkommen!</h1>\n<p>Baue deine App...</p>',
-        css: 'body { background: #121212; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }',
-        javascript: 'console.log("App gestartet!");'
+    let currentMode = 'html';
+    const project = {
+        html: `\n<div class="hero">\n  <h1>GitHub Workspace Clone</h1>\n  <button id="btn">Build Something Great</button>\n</div>`,
+        css: `body { background: #0d1117; color: white; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }\n.hero { text-align: center; border: 1px solid #30363d; padding: 40px; border-radius: 6px; }\nbutton { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }`,
+        javascript: `document.getElementById('btn').onclick = () => {\n  console.log('Action triggered!');\n  alert('Hello from NexusCode!');\n};`
     };
 
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
     require(['vs/editor/editor.main'], function() {
-        editor = monaco.editor.create(document.getElementById('editor-container'), {
-            value: codeStorage.html,
+        editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+            value: project.html,
             language: 'html',
             theme: 'vs-dark',
             automaticLayout: true,
-            fontSize: 14,
-            minimap: { enabled: true }
+            fontFamily: "'Fira Code', monospace",
+            fontSize: 13,
+            lineHeight: 20,
+            padding: { top: 10 }
         });
+
+        // Auto-Run Simulation
+        editor.onDidChangeModelContent(() => {
+            updatePreview();
+        });
+        updatePreview();
     });
 
-    function switchFile(type) {
-        codeStorage[currentFile] = editor.getValue();
-        currentFile = type;
-        document.getElementById('tab-name').innerText = type === 'javascript' ? 'script.js' : (type === 'css' ? 'style.css' : 'index.html');
-        monaco.editor.setModelLanguage(editor.getModel(), type === 'javascript' ? 'javascript' : type);
-        editor.setValue(codeStorage[type]);
+    function load(file) {
+        project[currentMode] = editor.getValue();
+        currentMode = file;
+        document.getElementById('active-tab-title').innerText = file === 'javascript' ? 'script.js' : (file === 'css' ? 'style.css' : 'index.html');
+        monaco.editor.setModelLanguage(editor.getModel(), file === 'javascript' ? 'javascript' : file);
+        editor.setValue(project[file]);
+        
+        document.querySelectorAll('.file').forEach(f => f.classList.remove('active'));
+        event.currentTarget.classList.add('active');
     }
 
-    function runApp() {
-        codeStorage[currentFile] = editor.getValue();
-        const frame = document.getElementById('app-preview');
-        const content = `<html><head><style>${codeStorage.css}</style></head><body>${codeStorage.html}<script>
-            const oldLog = console.log;
-            console.log = (m) => { window.parent.postMessage(m, "*"); oldLog(m); };
-            try { ${codeStorage.javascript} } catch(e) { console.log(e); }
+    function updatePreview() {
+        const frame = document.getElementById('preview-frame');
+        const code = `<html><head><style>${project.css}</style></head><body>${project.html}<script>
+            console.log = (m) => window.parent.postMessage(m, "*");
+            ${project.javascript}
         <\/script></body></html>`;
-        frame.srcdoc = content;
-        document.getElementById('terminal-out').innerHTML += "<br>> Executing build...";
+        frame.srcdoc = code;
     }
 
     window.onmessage = (e) => {
-        document.getElementById('terminal-out').innerHTML += `<br><span style="color:white">[LOG]: ${e.data}</span>`;
+        const c = document.getElementById('console');
+        c.innerHTML += `<br><span style="color:white">➜</span> ${e.data}`;
+        c.scrollTop = c.scrollHeight;
     };
 </script>
 </body>
